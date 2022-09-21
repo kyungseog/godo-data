@@ -6,8 +6,9 @@ require("dotenv").config();
 
 const partner_key = process.env.PARTNER_KEY;
 const key = process.env.KEY;
-const startDate = '2022-09-20 23:00:00';
-const endDate = '2022-09-20 23:05:00';
+const startDate = '2022-09-21 11:00:00';
+const endDate = '2022-09-21 11:10:00';
+const scmCode = 'S0000DIT';
 
 getDate();
 
@@ -24,9 +25,11 @@ async function getDate() {
         for( let i = 0; i < orderGoodsData.length; i++) {
             for (let j = 0; j < orderGoodsData[i].length; j++) {
                 const r = orderGoodsData[i][j];
-                const data = [r.orderNo[0],r.orderStatus[0],r.scmNo[0],r.goodsNo[0],
-                    r.listImageData[0],r.goodsNm[0],Number(r.goodsCnt[0]),Number(r.goodsPrice[0])];
-                orderData.push(data);
+                if(r.scmCode[0] == scmCode) {
+                    const data = [r.orderNo[0],r.orderStatus[0],r.scmCode[0],r.goodsNo[0],
+                        r.listImageData[0],r.goodsNm[0],Number(r.goodsCnt[0]),Number(r.goodsPrice[0])];
+                    orderData.push(data);
+                }
             }
         }
         console.log(orderData);
