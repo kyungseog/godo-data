@@ -1,3 +1,5 @@
+'use strict'
+
 const request = require("request");
 const { parseString } = require("xml2js");
 require("dotenv").config();
@@ -17,8 +19,17 @@ async function getDate() {
     const xmlRowData = await xmlData(options);
     parseString(xmlRowData, function(err, result) {
         const jsonData = result.data.return[0].order_data;
-        const orderGoodsData = jsonData.map( r => r.orderGoodsData);
-        console.log(orderGoodsData[0].length);
+        const orderGoodsData = jsonData.map( r => r.orderGoodsData );
+        let orderData = [];
+        for( let i = 0; i < orderGoodsData.length; i++) {
+            for (let j = 0; j < orderGoodsData[i].length; j++) {
+                const r = orderGoodsData[i][j];
+                const data = [r.orderNo[0],r.orderStatus[0],r.scmNo[0],r.goodsNo[0],
+                    r.listImageData[0],r.goodsNm[0],Number(r.goodsCnt[0]),Number(r.goodsPrice[0])];
+                orderData.push(data);
+            }
+        }
+        console.log(orderData);
     })
 }
 
