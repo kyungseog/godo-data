@@ -23,7 +23,7 @@ getOrderData();
 
 async function getOrderData() {
     const options = { method: 'POST',
-        url: `https://openhub.godo.co.kr/godomall5/order/Order_Search.php?partner_key=${util.key.partner_key}&key=${util.key.key}&dateType=order&startDate=${startDate}&endDate=${endDate}`
+        url: `${util.param.main_url}/order/Order_Search.php?${util.param.main_key}&dateType=order&startDate=${startDate}&endDate=${endDate}`
     };
 
     const xmlRowData = await util.xmlData(options);
@@ -44,5 +44,5 @@ async function getOrderData() {
         }
         
     });
-    const liveSCMSales = orderData.filter( r => r[2] == '493' );
+    const liveSCMSales = orderData.filter( r => r[2] == '635' );
 }
