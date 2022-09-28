@@ -1,8 +1,9 @@
 'use strict'
 
 const { parseString } = require("xml2js");
+const fs = require("fs");
 const util = require("./commonUtil.js");
-const companyNm = '(주) 신세계인터내셔날/자주'
+// const companyNm = '(주) 신세계인터내셔날/자주'
 
 getSCMData();
 
@@ -14,8 +15,9 @@ async function getSCMData() {
     const xmlRowData = await util.xmlData(options);
     parseString(xmlRowData, function(err, result) {
         const jsonData = result.data.return[0].code_data;
-        const codeData = jsonData.map( r => [r.scmNo[0],r.companyNm[0]] );
-        const companyNo = codeData.filter ( r => r[1] == companyNm );
-        console.log(companyNo[0][0]);
+        const codeData = jsonData.map( r => [r.scmNo[0],r.companyNm[0]] ).join("\n");
+        fs.writeFileSync('./data.txt',codeData,'utf8');
+        // const companyNo = codeData.filter ( r => r[1] == companyNm );
+        // console.log(companyNo[0][0]);
     })
 }
