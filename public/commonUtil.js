@@ -1,13 +1,17 @@
 'use strict'
 
 const request = require("request");
+const { App } = require("@slack/bolt")
 require("dotenv").config();
 
-const partner_key = process.env.PARTNER_KEY;
-const key = process.env.KEY;
-
 const main_url = 'https://openhub.godo.co.kr/godomall5';
-const main_key = `partner_key=${partner_key}&key=${key}`;
+const main_key = `partner_key=${process.env.PARTNER_KEY}&key=${process.env.KEY}`;
+
+module.exports.slackApp = new App({
+    token: process.env.TOKEN,
+    signingSecret: process.env.SIGNINGSECRET 
+  });
+  
 
 module.exports.xmlData = function xmlData(options) {
     return new Promise( (resolve, reject) => {

@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/kyungseog/godoAPIs#readme",
   "dependencies": {
+    "@slack/bolt": "^3.12.1",
     "dotenv": "^16.0.2",
+    "exceljs": "^4.3.0",
     "luxon": "^3.0.4",
     "request": "^2.88.2",
     "xml2js": "^0.4.23"
