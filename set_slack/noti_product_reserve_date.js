@@ -10,23 +10,21 @@ const util = require("../public/commonUtil.js");
 const endDate = DateTime.now().toFormat('yyyy-LL-dd');
 const addParam = `scmNo=1&searchDateType=regDt&startDate=2022-08-12&endDate=${endDate}`;
 
-// const getProductRule = new schedule.RecurrenceRule();
-// getProductRule.dayOfWeek = [1,2,3,4,5];
-// getProductRule.hour = 4;
-// getProductRule.minute = 0;
-// schedule.scheduleJob("getProduct", getProductRule, function(){
-//   getProduct();
-// });
+const getProductRule = new schedule.RecurrenceRule();
+getProductRule.dayOfWeek = [1,2,3,4,5];
+getProductRule.hour = 4;
+getProductRule.minute = 20;
+schedule.scheduleJob("getExcel", getProductRule, function(){
+  getExcel();
+});
 
-// const notiRule = new schedule.RecurrenceRule();
-// notiRule.dayOfWeek = [1,2,3,4,5];
-// notiRule.hour = 9;
-// notiRule.minute = 0;
-// schedule.scheduleJob("noti", notiRule, function(){
-//   notiSlack();
-// });
-
-getExcel();
+const notiRule = new schedule.RecurrenceRule();
+notiRule.dayOfWeek = [1,2,3,4,5];
+notiRule.hour = 9;
+notiRule.minute = 0;
+schedule.scheduleJob("noti", notiRule, function(){
+  notiSlack();
+});
 
 async function getExcel() {
   const wb = new excel.Workbook();
@@ -39,14 +37,16 @@ async function getExcel() {
   const xmlRowData = await util.xmlData(options);
   const jsonData = await util.parseXml(xmlRowData);
   let pageCount = Number(jsonData.data.header[0].max_page[0]);
-  pageCount = 1;
   let goodsData = [];
   for( let i = 0; i < pageCount; i++) {
     let data = await getProduct(i + 1);
+    if(data.length == 0) {
+      continue;
+    }
     goodsData.push(...data);
   }
 
-  if(goodsData){
+  if(goodsData.length != 0) {
     const ws = wb.getWorksheet('data');
     ws.columns = [
       {key: 'goodsNo', width: 15}, {key: 'goodsNm', width: 30}, 
@@ -54,8 +54,8 @@ async function getExcel() {
       {key: 'goodsCd', width: 15}, {key: 'goodsReserveOrderMessage', width: 20}
     ];
     ws.insertRows(2, goodsData);
+    await wb.xlsx.writeFile(`./files/noti_${DateTime.now().toFormat('yyyyLLdd')}.xlsx`);
   }
-  await wb.xlsx.writeFile(`./files/noti_${DateTime.now().toFormat('yyyyLLdd')}.xlsx`);
 }
 
 async function getProduct(pageNo) {
@@ -76,10 +76,12 @@ async function getProduct(pageNo) {
       const monthData = Number(data.substring(0,monthIndex));
       const dayData = Number(data.substring(monthIndex + 1,dayIndex));
       targetDate = DateTime.fromObject({month:monthData, day:dayData}).toFormat('LLdd');
-      console.log(targetDate);
     }
     return data != "" && targetDate == DateTime.now().plus({days: 1}).toFormat('LLdd');
   });
+  if(selectedGoodsData.length == 0) {
+    return;
+  }
   const goodsDataArray = selectedGoodsData.map( 
     r => [r.goodsNo[0],r.goodsNm[0],r.goodsDisplayFl[0],r.goodsSellFl[0],r.goodsCd[0], r.goodsReserveOrderMessage[0]]
   );
@@ -88,6 +90,7 @@ async function getProduct(pageNo) {
 
 //무무즈코리아 채널 번호 GQUJ3SB8S 
 async function notiSlack() {
+  if(fs.existsSync(__dirname + '/files/noti_' + DateTime.now().toFormat('yyyyLLdd') + ".xlsx")) {
     try {
       const result = await util.slackApp.client.files.upload({
         channels: 'GQUJ3SB8S',
@@ -100,3 +103,4 @@ async function notiSlack() {
       console.error(error);
     }
   }
+}
