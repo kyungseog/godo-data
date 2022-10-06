@@ -40,6 +40,7 @@ async function getExcel() {
   let goodsData = [];
   for( let i = 0; i < pageCount; i++) {
     let data = await getProduct(i + 1);
+    console.log(data);
     if(data.length == 0) {
       continue;
     }
@@ -71,16 +72,29 @@ async function getProduct(pageNo) {
     let targetDate = '';
     if(data != "") {
       data.replace(/ /g,"");
-      const monthIndex = data.indexOf("월");
-      const dayIndex = data.indexOf("일");
-      const monthData = Number(data.substring(0,monthIndex));
-      const dayData = Number(data.substring(monthIndex + 1,dayIndex));
+
+      const checkIndex = data.indexOf("]");
+      let monthIndex = data.indexOf("월");
+      let dayIndex = data.indexOf("일");
+      let monthData = 0;
+      let dayData = 0;
+
+      if(checkIndex > 0) {
+        monthIndex = data.indexOf("월", checkIndex);
+        dayIndex = data.indexOf("일", checkIndex);
+        monthData = Number(data.substring(data.indexOf("]") + 1, monthIndex));
+        dayData = Number(data.substring(monthIndex + 1,dayIndex));
+      } else {
+        monthData = Number(data.substring(0,monthIndex));
+        dayData = Number(data.substring(monthIndex + 1,dayIndex));
+      }
+
       targetDate = DateTime.fromObject({month:monthData, day:dayData}).toFormat('LLdd');
     }
-    return data != "" && targetDate == DateTime.now().plus({days: 1}).toFormat('LLdd');
+    return data != "" && targetDate <= DateTime.now().plus({days: 1}).toFormat('LLdd');
   });
   if(selectedGoodsData.length == 0) {
-    return;
+    return [];
   }
   const goodsDataArray = selectedGoodsData.map( 
     r => [r.goodsNo[0],r.goodsNm[0],r.goodsDisplayFl[0],r.goodsSellFl[0],r.goodsCd[0], r.goodsReserveOrderMessage[0]]
@@ -94,7 +108,7 @@ async function notiSlack() {
     try {
       const result = await util.slackApp.client.files.upload({
         channels: 'GQUJ3SB8S',
-        initial_comment: `<@U01514WLEJV> <@US6E9DY66> *예약 배송일이 내일인 아이템입니다.* 어드민에서 일정을 확인해주세요\n`,
+        initial_comment: `<@U01514WLEJV> <@US6E9DY66> <@U015JK6LXLK> *예약 배송일이 내일인 아이템입니다.* 어드민에서 일정을 확인해주세요\n`,
         file: fs.createReadStream(__dirname + '/files/noti_' + DateTime.now().toFormat('yyyyLLdd') + ".xlsx")
       });
       console.log(result);
