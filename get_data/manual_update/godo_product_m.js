@@ -1,20 +1,11 @@
 'use strict'
 
-const schedule = require('node-schedule');
-const { DateTime } = require("luxon");
+const util = require("../../public/commonUtil.js");
 
-const util = require("../public/commonUtil.js");
+const startDate = '2022-08-11';
+const endDate = '2022-08-11';
 
-const startDate = DateTime.now().minus({days: 1}).toFormat('yyyy-LL-dd');
-const endDate = DateTime.now().toFormat('yyyy-LL-dd');
-
-const getProductRule = new schedule.RecurrenceRule();
-getProductRule.dayOfWeek = [0, 1, 2, 3, 4, 5, 6];
-getProductRule.hour = 4;
-getProductRule.minute = 40;
-schedule.scheduleJob("getProductData", getProductRule, function(){
-    getCount();
-});
+getCount();
 
 async function getCount() {
     const options = { method: 'POST',

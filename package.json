@@ -22,6 +22,7 @@
     "dotenv": "^16.0.3",
     "exceljs": "^4.3.0",
     "luxon": "^3.0.4",
+    "mysql2": "^2.3.3",
     "node-schedule": "^2.1.0",
     "request": "^2.88.2",
     "xml2js": "^0.4.23"

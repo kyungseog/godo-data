@@ -1,21 +1,12 @@
 'use strict'
 
-const schedule = require('node-schedule');
-const { DateTime } = require("luxon");
+const util = require("../../public/commonUtil.js");
 
-const util = require("../public/commonUtil.js");
-
-const startDate = DateTime.now().minus({days: 1}).toFormat('yyyy-LL-dd');
+const startDate = '2022-08-26';
 const endDate = startDate;
 const orderChannel = ["shop","naverpay"];
 
-const rule = new schedule.RecurrenceRule();
-rule.dayOfWeek = [0, 1, 2, 3, 4, 5, 6];
-rule.hour = 3;
-rule.minute = 30;
-schedule.scheduleJob("sales", rule, function(){
-    setOrderChannel();
-});
+setOrderChannel();
 
 async function setOrderChannel() {
     const orderStatus = await util.sqlData('SELECT order_status_code FROM gododb.order_status');
