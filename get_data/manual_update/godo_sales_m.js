@@ -2,34 +2,64 @@
 
 const util = require("../../public/commonUtil.js");
 
-const startDate = '2022-08-26';
-const endDate = startDate;
-const orderChannel = ["shop","naverpay"];
+const targetDate = ['2022-10-13','2022-10-14','2022-10-15','2022-10-16','2022-10-17'];
+let errorCount = 0;
 
-setOrderChannel();
+setDate();
 
-async function setOrderChannel() {
-    const orderStatus = await util.sqlData('SELECT order_status_code FROM gododb.order_status');
-    for (let i = 0; i < orderChannel.length; i++) {
-        for (let j = 0; j < orderStatus.length; j++) {
-            const d = await getOrderData(orderChannel[i], orderStatus[j].order_status_code);
-            console.log(d);
-        }
-        console.log (startDate, " / ", orderChannel[i], " update complete");
+async function setDate() {
+    for(let i = 0; i < targetDate.length; i++) {
+        const start1 = `${targetDate[i]} 00:00:00`;
+        const end1 = `${targetDate[i]} 11:59:59`;
+        const start2 = `${targetDate[i]} 12:00:00`;
+        const end2 = `${targetDate[i]} 23:59:59`;
+        
+        const startDateArray = [start1, start2];
+        const endDateArray = [end1, end2];
+        
+        const m = await setOrderChannel(startDateArray, endDateArray);
+        console.log(targetDate[i], m);
+        await util.delayTime(5000);
     }
 }
 
-async function getOrderData(channel, status) {
+async function setOrderChannel(startDateArray, endDateArray) {
+    const orderChannel = ["shop","naverpay"];
+    const orderStatus = await util.sqlData('SELECT order_status_code FROM gododb.order_status');
+    for (let i = 0; i < orderChannel.length; i++) {
+        for (let j = 0; j < orderStatus.length; j++) {
+            for (let k = 0; k < startDateArray.length; k++) {
+                const d = await getOrderData(orderChannel[i], orderStatus[j].order_status_code, startDateArray[k], endDateArray[k]);
+                await util.delayTime(1000);
+                console.log(d);
+            }
+            await util.delayTime(1000);
+        }
+        await util.delayTime(1000);
+        console.log (targetDate, " / ", orderChannel[i], " update complete");
+    }
+    return " update complete";
+}
+
+async function getOrderData(channel, status, startDate, endDate) {
     const options = { method: 'POST',
         url: `${util.param.main_url}/order/Order_Search.php?${util.param.main_key}&dateType=order&startDate=${startDate}&endDate=${endDate}&orderChannel=${channel}&orderStatus=${status}`
     };
 
     const xmlRowData = await util.xmlData(options);
     const jsonData = await util.parseXml(xmlRowData);
-    if(jsonData.data.header == undefined) {
-        await util.delayTime(5000);
-        getOrderData(channel, status);
+    console.log(jsonData);
+    
+    if(jsonData.data == undefined) {
+        await util.delayTime(30000);
+        errorCount++
+        if( errorCount < 5 ) {
+            getOrderData(channel, status,startDate, endDate)
+        } else {
+            return "header data error";
+        } 
     } else {
+        errorCount = 0;
         if(jsonData.data.header[0].code == '000') {
             const orderData = jsonData.data.return[0].order_data;
             if(orderData) {
@@ -41,8 +71,8 @@ async function getOrderData(channel, status) {
                             s.listImageData[0],s.goodsNm[0],s.goodsCnt[0],s.goodsPrice[0],s.divisionUseMileage[0],s.divisionCouponOrderDcPrice[0],
                             s.divisionUseDeposit[0],s.divisionCouponOrderMileage[0],s.optionPrice[0],s.fixedPrice[0],s.goodsDcPrice[0],s.memberDcPrice[0],
                             s.memberOverlapDcPrice[0],s.couponGoodsDcPrice[0],s.optionSno[0],orderData[i].orderDate[0],s.paymentDt[0],s.invoiceDt[0],s.deliveryDt[0],
-                            s.deliveryCompleteDt[0],s.finishDt[0],s.memId == undefined ? null : s.memId[0],
-                            s.firstSaleFl == undefined ? null : s.firstSaleFl[0] ];
+                            s.deliveryCompleteDt[0],s.finishDt[0],orderData[i].memId == undefined ? null : orderData[i].memId[0],
+                            orderData[i].firstSaleFl == undefined ? null : orderData[i].firstSaleFl[0] ];
                         if(s.claimData) {
                             return basicData.concat([ s.claimData[0].handleMode[0],s.claimData[0].handleCompleteFl[0],s.claimData[0].handleReason[0],
                                 s.claimData[0].handleDt[0]=='' ? null : s.claimData[0].handleDt[0] ]);
@@ -77,13 +107,13 @@ async function getOrderData(channel, status) {
                             finish_date=values(finish_date), member_id=values(member_id), first_sale_flag=values(first_sale_flag), handle_mode=values(handle_mode), handle_complete_flag=values(handle_complete_flag), 
                             handle_reason=values(handle_reason), handle_date=values(handle_date)`;
                     util.param.db.query(insertOrderSql, [updateArray]);
-                    await util.delayTime(2000);
+                    await util.delayTime(1000);
                 }
-                return channel + "/" + status + " update complete";
+                return channel + " / " + status + " / " + startDate + " update complete";
             }
         } else {
-            return channel + "/" + status + " Error";
+            return channel + " / " + status + " / " + startDate + " Error";
         }
-        return channel + "/" + status + " No Data";
+        return channel + " / " + status + " / " + startDate + " No Data";
     }
 }

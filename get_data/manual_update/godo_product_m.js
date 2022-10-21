@@ -2,8 +2,8 @@
 
 const util = require("../../public/commonUtil.js");
 
-const startDate = '2022-08-11';
-const endDate = '2022-08-11';
+const startDate = '2022-10-17';
+const endDate = '2022-10-20';
 
 getCount();
 
@@ -34,7 +34,7 @@ async function getProduct(pageNo) {
     for(let i = 0; i < goodsData.length; i++) {
         const r = goodsData[i];
         const productData = [r.goodsNo[0],r.goodsNm[0],r.scmNo[0],r.scmCommissionGrade[0],r.goodsCd[0],r.brandCd[0],
-            Number(r.fixedPrice[0]),Number(r.goodsPrice[0]),r.deliverySno[0],r.allCateCd[0],r.goodsDisplayFl[0],
+            Number(r.fixedPrice[0]) > 100000000 ? 0 : Number(r.fixedPrice[0]),Number(r.goodsPrice[0]) > 100000000 ? 0 : Number(r.goodsPrice[0]),r.deliverySno[0],r.allCateCd[0],r.goodsDisplayFl[0],
             r.goodsDisplayMobileFl[0],r.goodsSellFl[0],r.goodsSellMobileFl[0],
             r.listImageData == undefined ? null : r.listImageData[0]._,r.regDt[0],r.modDt[0] == '' ? null : r.modDt[0]];
         const insertProductSql = `INSERT INTO gododb.api_products (goods_no, goods_name, scm_no, scm_commission_grade, 

@@ -4,7 +4,7 @@ const { DateTime } = require("luxon");
 
 const util = require("../../public/commonUtil.js");
 
-const goodsNo = '1000006216';
+const goodsNo = '1000011568';
 
 getProduct();
 
@@ -16,5 +16,5 @@ async function getProduct() {
     const xmlRowData = await util.xmlData(options);
     const jsonData = await util.parseXml(xmlRowData);
     const goodsData = jsonData.data.return[0].goods_data;
-    console.log(goodsData[0]);
+    console.log(goodsData[0].optionData);
 }

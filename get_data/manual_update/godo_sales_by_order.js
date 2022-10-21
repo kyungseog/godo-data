@@ -2,7 +2,7 @@
 
 const util = require("../../public/commonUtil.js");
 
-const orderNo = '2209302356440893';
+const orderNo = '2209041441119669';
 
 getOrderData();
 
@@ -14,5 +14,5 @@ async function getOrderData() {
     const xmlRowData = await util.xmlData(options);
     const jsonData = await util.parseXml(xmlRowData);
     const orderData = jsonData.data.return[0].order_data;
-    console.log(orderData[0].orderGoodsData[0].goodsDiscountInfo);
+    console.log(orderData[0]);
 }

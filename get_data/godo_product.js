@@ -18,7 +18,7 @@ schedule.scheduleJob("getProductData", getProductRule, function(){
 
 async function getCount() {
     const options = { method: 'POST',
-        url: `${util.param.main_url}/goods/Goods_Search.php?${util.param.main_key}&searchDateType=regDt&startDate=${startDate}&endDate=${endDate}`
+        url: `${util.param.main_url}/goods/Goods_Search.php?${util.param.main_key}&searchDateType=modDt&startDate=${startDate}&endDate=${endDate}`
     };
 
     const xmlRowData = await util.xmlData(options);
@@ -33,7 +33,7 @@ async function getCount() {
 
 async function getProduct(pageNo) {
     const options = { method: 'POST',
-        url: `${util.param.main_url}/goods/Goods_Search.php?${util.param.main_key}&searchDateType=regDt&startDate=${startDate}&endDate=${endDate}&page=${pageNo}`
+        url: `${util.param.main_url}/goods/Goods_Search.php?${util.param.main_key}&searchDateType=modDt&startDate=${startDate}&endDate=${endDate}&page=${pageNo}`
     };
 
     const xmlRowData = await util.xmlData(options);
